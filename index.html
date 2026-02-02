@@ -90,31 +90,32 @@
     <script>
         const params = new URLSearchParams(window.location.search);
         
-        // Accept both scholarshipRef and scholarshipRefrence
-        const scholarshipId = params.get('scholarshipRefrence') || params.get('scholarshipRef');
+        // Get the scholarship reference - this should be the full document ID
+        // Example URL: ?scholarshipRefrence=abc123&isMatches=false&isApplied=false
+        const scholarshipRefrence = params.get('scholarshipRefrence') || params.get('scholarshipRef');
         
-        // Booleans default to false
+        // Booleans
         const isMatches = params.get('isMatches') === 'true';
         const isApplied = params.get('isApplied') === 'true';
         
         console.log({
-            scholarshipId,
+            scholarshipRefrence,
             isMatches,
             isApplied
         });
         
-        // Build deep link
+        // Build deep link - EXACTLY matching your Flutter share link format
         let deepLink = 'opportunitydeck://opportunitydeck.com';
         
-        if (scholarshipId) {
-            // Pass just the ID, not the full path
+        if (scholarshipRefrence) {
+            // Build the deep link exactly as Flutter expects it
             deepLink =
                 `opportunitydeck://opportunitydeck.com/viewDetails` +
-                `?scholarshipId=${scholarshipId}` +
+                `?scholarshipRefrence=${scholarshipRefrence}` +
                 `&isMatches=${isMatches}` +
                 `&isApplied=${isApplied}`;
         } else {
-            console.error('Missing required parameter: scholarshipRef or scholarshipRefrence');
+            console.error('Missing required parameter: scholarshipRefrence');
             const errorMsg = document.getElementById('errorMsg');
             errorMsg.textContent = 'Error: Missing scholarship information';
             errorMsg.style.display = 'block';
@@ -127,17 +128,16 @@
         // Click triggers deep link
         appButton.addEventListener('click', (e) => {
             e.preventDefault();
-            if (scholarshipId) {
+            if (scholarshipRefrence) {
                 console.log('Redirecting to deep link:', deepLink);
                 window.location.href = deepLink;
                 
-                // Fallback to app store if app doesn't open after 2 seconds
+                // Fallback to app store if app doesn't open after 2.5 seconds
                 setTimeout(() => {
-                    // Check if user is still on the page (app didn't open)
                     if (document.hidden === false) {
-                        console.log('App may not be installed, consider redirecting to store');
+                        console.log('App may not be installed');
                     }
-                }, 2000);
+                }, 2500);
             } else {
                 alert('Missing required scholarship parameter.');
             }
@@ -145,9 +145,10 @@
         
         console.log('Generated deep link:', deepLink);
         
-        // Auto-redirect after 1 second if scholarship ID exists
-        if (scholarshipId) {
+        // Auto-redirect after 1 second if scholarship reference exists
+        if (scholarshipRefrence) {
             setTimeout(() => {
+                console.log('Auto-redirecting to app...');
                 window.location.href = deepLink;
             }, 1000);
         }

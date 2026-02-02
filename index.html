@@ -85,16 +85,17 @@
     </div>
 
     <script>
-        // 1️⃣ Read the scholarshipRefrence from query params
+        // 1️⃣ Read the new query parameter "scholarshipId" from URL
         const params = new URLSearchParams(window.location.search);
-        const scholarshipId = params.get('scholarshipRefrence');
+        const scholarshipId = params.get('scholarshipId');
 
         console.log('Scholarship ID:', scholarshipId);
 
-        // 2️⃣ Build deep link with all required page parameters
+        // 2️⃣ Build deep link with FlutterFlow expected parameter names
         let deepLink = 'opportunitydeck://opportunitydeck.com';
 
         if (scholarshipId) {
+            // userRef is the FlutterFlow Document Reference parameter
             deepLink = `opportunitydeck://opportunitydeck.com/viewDetails?userRef=Scholarships/${scholarshipId}&isMatches=false&isApplied=false`;
         }
 

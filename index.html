@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Opportunity Deck - Opening...</title>
 
     <style>
@@ -85,14 +85,15 @@
     </div>
 
     <script>
-        // 1️⃣ Read query parameters from URL
+        // Read query parameters from URL
         const params = new URLSearchParams(window.location.search);
 
-        const scholarshipId = params.get('scholarshipRef');
+        // NOTE: Parameter name must exactly match FlutterFlow: 'scholarshipRefrence' (with typo)
+        const scholarshipId = params.get('scholarshipRefrence');
 
-        // Booleans (default to false)
-        const isMatches = params.get('isMatches') === 'true' ? true : false;
-        const isApplied = params.get('isApplied') === 'true' ? true : false;
+        // Booleans default to false, check string 'true'
+        const isMatches = params.get('isMatches') === 'true';
+        const isApplied = params.get('isApplied') === 'true';
 
         console.log({
             scholarshipId,
@@ -100,34 +101,34 @@
             isApplied
         });
 
-        // 2️⃣ Build FlutterFlow deep link
+        // Build FlutterFlow deep link
         let deepLink = 'opportunitydeck://opportunitydeck.com';
 
         if (scholarshipId) {
             deepLink =
                 `opportunitydeck://opportunitydeck.com/viewDetails` +
-                `?scholarshipReference=Scholarships/${scholarshipId}` +
+                `?scholarshipRefrence=Scholarships/${scholarshipId}` +
                 `&isMatches=${isMatches}` +
                 `&isApplied=${isApplied}`;
+
+            // Auto-open the app after 500ms
+            setTimeout(() => {
+                window.location.href = deepLink;
+            }, 500);
+        } else {
+            console.error('Missing required parameter: scholarshipRefrence');
         }
 
-        console.log('Deep Link:', deepLink);
-
-        // 3️⃣ Update Open App button
+        // Update "Open in App" button href
         document.getElementById('appLink').href = deepLink;
 
-        // 4️⃣ Auto-open app
-        setTimeout(() => {
-            window.location.href = deepLink;
-        }, 500);
-
-        // 5️⃣ Detect if app opened
+        // Detect if app opened (for fallback)
         let appOpened = false;
         window.addEventListener('blur', () => {
             appOpened = true;
         });
 
-        // 6️⃣ Store fallback
+        // Fallback to store download (commented out; enable if needed)
         setTimeout(() => {
             if (!appOpened) {
                 const ua = navigator.userAgent.toLowerCase();

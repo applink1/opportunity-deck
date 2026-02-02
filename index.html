@@ -82,7 +82,7 @@
         </div>
     </div>
     <script>
-        // 1️⃣ Read scholarshipRefrence from query params
+        // 1️⃣ Read parameters from query params
         const params = new URLSearchParams(window.location.search);
         const scholarshipId = params.get('scholarshipRefrence') || params.get('scholarshipRef');
         const isMatches = params.get('isMatches') === 'true';
@@ -93,12 +93,12 @@
         console.log('isApplied:', isApplied);
         
         // 2️⃣ Build deep link
-        // IMPORTANT: DocumentRef must be full Firestore path
+        // IMPORTANT: Note the typo in your Flutter - it's "scholarsipRefrence" not "scholarshipRefrence"
         let deepLink = 'opportunitydeck://opportunitydeck.com';
         
         if (scholarshipId) {
-            // Include the FULL Firestore path: Scholarships/abc123
-            deepLink = `opportunitydeck://opportunitydeck.com/viewDetails?scholarshipRefrence=Scholarships/${scholarshipId}&isMatches=${isMatches}&isApplied=${isApplied}`;
+            // FlutterFlow format for DocumentReference: Scholarships/ID
+            deepLink = `opportunitydeck://opportunitydeck.com/viewDetails?scholarsipRefrence=Scholarships/${scholarshipId}&isMatches=${isMatches}&isApplied=${isApplied}`;
         }
         
         console.log('Deep Link:', deepLink);

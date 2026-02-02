@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opportyunity Deck - Opening Scholarship...</title>
+    <title>JDXR - Opening Profile...</title>
 
     <style>
         body {
@@ -69,9 +69,9 @@
 
 <body>
     <div class="container">
-        <div class="logo">Opportunity Deck</div>
+        <div class="logo">JDXR</div>
         <div class="spinner"></div>
-        <h2>Opening Scholarship...</h2>
+        <h2>Opening profile...</h2>
         <p>Redirecting you to the app</p>
 
         <div class="links">
@@ -85,17 +85,17 @@
     </div>
 
     <script>
-        // 1️⃣ Read scholarshipRefrence from query params
+        // 1️⃣ Read the scholarshipRefrence from query params
         const params = new URLSearchParams(window.location.search);
-        const userId = params.get('scholarshipRefrence'); // ✅ updated parameter name
+        const scholarshipId = params.get('scholarshipRefrence');
 
-        console.log('User ID:', userId);
+        console.log('Scholarship ID:', scholarshipId);
 
-        // 2️⃣ Build FlutterFlow deep link
+        // 2️⃣ Build deep link with all required page parameters
         let deepLink = 'opportunitydeck://opportunitydeck.com';
 
-        if (userId) {
-            deepLink = `opportunitydeck://opportunitydeck.com/viewDetails?userRef=Scholarships/${userId}`;
+        if (scholarshipId) {
+            deepLink = `opportunitydeck://opportunitydeck.com/viewDetails?userRef=Scholarships/${scholarshipId}&isMatches=false&isApplied=false`;
         }
 
         console.log('Deep Link:', deepLink);
@@ -105,10 +105,12 @@
 
         // 4️⃣ Auto open app after short delay
         setTimeout(() => {
-            window.location.href = deepLink;
+            if (scholarshipId) {
+                window.location.href = deepLink;
+            }
         }, 500);
 
-        // 5️⃣ Optional fallback if app not installed
+        // 5️⃣ Fallback to App Store / Play Store if app not installed
         let appOpened = false;
         window.addEventListener('blur', () => {
             appOpened = true;
@@ -117,10 +119,11 @@
         setTimeout(() => {
             if (!appOpened) {
                 const ua = navigator.userAgent.toLowerCase();
+
                 if (ua.includes('android')) {
-                    // window.location.href = 'https://play.google.com/store/apps/details?id=com.mycompany.opportunitydeck';
+                    window.location.href = 'https://play.google.com/store/apps/details?id=com.mycompany.opportunitydeck';
                 } else if (ua.includes('iphone') || ua.includes('ipad')) {
-                    // window.location.href = 'https://apps.apple.com/app/YOUR_APP_ID';
+                    window.location.href = 'https://apps.apple.com/app/YOUR_APP_ID';
                 }
             }
         }, 3000);

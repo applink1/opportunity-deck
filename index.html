@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Opportunity Deck - Opening...</title>
 
     <style>
@@ -59,6 +59,7 @@
             border-radius: 25px;
             margin: 10px;
             font-size: 16px;
+            cursor: pointer;
         }
         .btn-primary {
             background: white;
@@ -72,7 +73,7 @@
         <div class="logo">Opportunity Deck</div>
         <div class="spinner"></div>
         <h2>Opening opportunity...</h2>
-        <p>Redirecting you to the app</p>
+        <p>Click below to open in the app</p>
 
         <div class="links">
             <a href="#" id="appLink" class="btn btn-primary">Open in App</a>
@@ -88,58 +89,41 @@
         // Read query parameters from URL
         const params = new URLSearchParams(window.location.search);
 
-        // NOTE: Parameter name must exactly match FlutterFlow: 'scholarshipRefrence' (with typo)
+        // Must match FlutterFlow parameter name exactly
         const scholarshipId = params.get('scholarshipRefrence');
 
-        // Booleans default to false, check string 'true'
+        // Booleans default to false
         const isMatches = params.get('isMatches') === 'true';
         const isApplied = params.get('isApplied') === 'true';
 
-        console.log({
-            scholarshipId,
-            isMatches,
-            isApplied
-        });
-
-        // Build FlutterFlow deep link
+        // Build the deep link
         let deepLink = 'opportunitydeck://opportunitydeck.com';
-
         if (scholarshipId) {
             deepLink =
                 `opportunitydeck://opportunitydeck.com/viewDetails` +
                 `?scholarshipRefrence=Scholarships/${scholarshipId}` +
                 `&isMatches=${isMatches}` +
                 `&isApplied=${isApplied}`;
-
-            // Auto-open the app after 500ms
-            setTimeout(() => {
-                window.location.href = deepLink;
-            }, 500);
         } else {
             console.error('Missing required parameter: scholarshipRefrence');
         }
 
         // Update "Open in App" button href
-        document.getElementById('appLink').href = deepLink;
+        const appButton = document.getElementById('appLink');
+        appButton.href = deepLink;
 
-        // Detect if app opened (for fallback)
-        let appOpened = false;
-        window.addEventListener('blur', () => {
-            appOpened = true;
+        // Optional: click triggers redirect to avoid browser blocking auto redirects
+        appButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (scholarshipId) {
+                console.log('Redirecting to deep link:', deepLink);
+                window.location.href = deepLink;
+            } else {
+                alert('Missing required scholarship parameter.');
+            }
         });
 
-        // Fallback to store download (commented out; enable if needed)
-        setTimeout(() => {
-            if (!appOpened) {
-                const ua = navigator.userAgent.toLowerCase();
-
-                if (ua.includes('android')) {
-                    // window.location.href = 'https://play.google.com/store/apps/details?id=com.mycompany.opportunitydeck';
-                } else if (ua.includes('iphone') || ua.includes('ipad')) {
-                    // window.location.href = 'https://apps.apple.com/app/YOUR_APP_ID';
-                }
-            }
-        }, 3000);
+        console.log('Generated deep link:', deepLink);
     </script>
 </body>
 </html>

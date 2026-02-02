@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Opportunity Deck - Opening...</title>
 
     <style>
@@ -76,7 +76,7 @@
 
         <div class="links">
             <a href="#" id="appLink" class="btn btn-primary">Open in App</a>
-            <br>
+            <br />
             <a href="https://apps.apple.com/app/YOUR_APP_ID" class="btn">Download for iOS</a>
             <a href="https://play.google.com/store/apps/details?id=com.mycompany.opportunitydeck" class="btn">
                 Download for Android
@@ -85,23 +85,35 @@
     </div>
 
     <script>
-        // 1️⃣ Read scholarship reference ID from query params
+        // 1️⃣ Read query parameters from URL
         const params = new URLSearchParams(window.location.search);
+
         const scholarshipId = params.get('scholarshipRef');
 
-        console.log('Scholarship ID:', scholarshipId);
+        // Booleans (default to false)
+        const isMatches = params.get('isMatches') === 'true' ? true : false;
+        const isApplied = params.get('isApplied') === 'true' ? true : false;
+
+        console.log({
+            scholarshipId,
+            isMatches,
+            isApplied
+        });
 
         // 2️⃣ Build FlutterFlow deep link
-        // DocumentReference MUST be full Firestore path
         let deepLink = 'opportunitydeck://opportunitydeck.com';
 
         if (scholarshipId) {
-            deepLink = `opportunitydeck://opportunitydeck.com/viewDetails?scholarsipRefrence=Scholarships/${scholarshipId}`;
+            deepLink =
+                `opportunitydeck://opportunitydeck.com/viewDetails` +
+                `?scholarshipReference=Scholarships/${scholarshipId}` +
+                `&isMatches=${isMatches}` +
+                `&isApplied=${isApplied}`;
         }
 
         console.log('Deep Link:', deepLink);
 
-        // 3️⃣ Update button
+        // 3️⃣ Update Open App button
         document.getElementById('appLink').href = deepLink;
 
         // 4️⃣ Auto-open app
@@ -109,12 +121,13 @@
             window.location.href = deepLink;
         }, 500);
 
-        // 5️⃣ Store fallback detection
+        // 5️⃣ Detect if app opened
         let appOpened = false;
         window.addEventListener('blur', () => {
             appOpened = true;
         });
 
+        // 6️⃣ Store fallback
         setTimeout(() => {
             if (!appOpened) {
                 const ua = navigator.userAgent.toLowerCase();

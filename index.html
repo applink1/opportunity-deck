@@ -85,14 +85,13 @@
     </div>
 
     <script>
-        // 1️⃣ Read userRef from query params
+        // 1️⃣ Read scholarshipRefrence from query params
         const params = new URLSearchParams(window.location.search);
-        const userId = params.get('userRef');
+        const userId = params.get('scholarshipRefrence'); // ✅ updated parameter name
 
         console.log('User ID:', userId);
 
         // 2️⃣ Build FlutterFlow deep link
-        // IMPORTANT: DocumentRef must be full Firestore path
         let deepLink = 'opportunitydeck://opportunitydeck.com';
 
         if (userId) {
@@ -101,7 +100,7 @@
 
         console.log('Deep Link:', deepLink);
 
-        // 3️⃣ Update button
+        // 3️⃣ Update "Open in App" button
         document.getElementById('appLink').href = deepLink;
 
         // 4️⃣ Auto open app after short delay
@@ -109,7 +108,7 @@
             window.location.href = deepLink;
         }, 500);
 
-        // 5️⃣ Store fallback (optional)
+        // 5️⃣ Optional fallback if app not installed
         let appOpened = false;
         window.addEventListener('blur', () => {
             appOpened = true;
@@ -118,9 +117,8 @@
         setTimeout(() => {
             if (!appOpened) {
                 const ua = navigator.userAgent.toLowerCase();
-
                 if (ua.includes('android')) {
-                    // window.location.href = 'https://play.google.com/store/apps/details?id=com.mycompany.jdxr';
+                    // window.location.href = 'https://play.google.com/store/apps/details?id=com.mycompany.opportunitydeck';
                 } else if (ua.includes('iphone') || ua.includes('ipad')) {
                     // window.location.href = 'https://apps.apple.com/app/YOUR_APP_ID';
                 }

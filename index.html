@@ -10,14 +10,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
+            padding: 20px;
         }
         .container {
             text-align: center;
             padding: 20px;
+            max-width: 600px;
         }
         .logo {
             font-size: 42px;
@@ -59,13 +61,31 @@
             margin: 10px;
             font-size: 16px;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
         }
         .btn-primary {
             background: white;
             color: #11998e;
         }
+        .debug {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+            max-width: 100%;
+            overflow-x: auto;
+        }
         .error {
             color: #ffcccc;
+            background: rgba(255,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
             margin-top: 20px;
             display: none;
         }
@@ -74,10 +94,17 @@
 <body>
     <div class="container">
         <div class="logo">Opportunity Deck</div>
-        <div class="spinner"></div>
-        <h2>Opening opportunity...</h2>
-        <p>Click below to open in the app</p>
+        <div class="spinner" id="spinner"></div>
+        <h2 id="status">Opening opportunity...</h2>
+        <p id="message">Click below to open in the app</p>
+        
+        <div class="debug" id="debugInfo">
+            <strong>Debug Information:</strong><br>
+            Loading...
+        </div>
+        
         <p class="error" id="errorMsg"></p>
+        
         <div class="links">
             <a href="#" id="appLink" class="btn btn-primary">Open in App</a>
             <br />
@@ -88,15 +115,31 @@
         </div>
     </div>
     <script>
+        // Get current URL parameters
+        const currentUrl = window.location.href;
         const params = new URLSearchParams(window.location.search);
         
-        // Get the scholarship reference - this should be the full document ID
-        // Example URL: ?scholarshipRefrence=abc123&isMatches=false&isApplied=false
-        const scholarshipRefrence = params.get('scholarshipRefrence') || params.get('scholarshipRef');
+        // Log everything for debugging
+        console.log('=== DEEP LINK DEBUG ===');
+        console.log('Current URL:', currentUrl);
+        console.log('All params:', Object.fromEntries(params));
         
-        // Booleans
+        // Get the scholarship reference
+        const scholarshipRefrence = params.get('scholarshipRefrence') || params.get('scholarshipRef');
         const isMatches = params.get('isMatches') === 'true';
         const isApplied = params.get('isApplied') === 'true';
+        
+        // Display debug info
+        const debugInfo = document.getElementById('debugInfo');
+        debugInfo.innerHTML = `
+            <strong>Debug Information:</strong><br>
+            Current URL: ${currentUrl}<br>
+            scholarshipRefrence: ${scholarshipRefrence || 'MISSING!'}<br>
+            isMatches: ${isMatches}<br>
+            isApplied: ${isApplied}<br>
+            <br>
+            All URL params: ${JSON.stringify(Object.fromEntries(params), null, 2)}
+        `;
         
         console.log({
             scholarshipRefrence,
@@ -104,54 +147,76 @@
             isApplied
         });
         
-        // Build deep link - EXACTLY matching your Flutter share link format
-        let deepLink = 'opportunitydeck://opportunitydeck.com';
+        // Build deep link
+        let deepLink = '';
         
-        if (scholarshipRefrence) {
-            // Build the deep link exactly as Flutter expects it
-            deepLink =
-                `opportunitydeck://opportunitydeck.com/viewDetails` +
-                `?scholarshipRefrence=${scholarshipRefrence}` +
-                `&isMatches=${isMatches}` +
-                `&isApplied=${isApplied}`;
-        } else {
-            console.error('Missing required parameter: scholarshipRefrence');
+        if (!scholarshipRefrence) {
+            console.error('❌ Missing scholarship reference!');
             const errorMsg = document.getElementById('errorMsg');
-            errorMsg.textContent = 'Error: Missing scholarship information';
+            errorMsg.textContent = 'Error: Missing scholarship information. Check the URL parameters.';
             errorMsg.style.display = 'block';
-        }
-        
-        // Update "Open in App" button
-        const appButton = document.getElementById('appLink');
-        appButton.href = deepLink;
-        
-        // Click triggers deep link
-        appButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (scholarshipRefrence) {
-                console.log('Redirecting to deep link:', deepLink);
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('status').textContent = 'Error';
+            document.getElementById('message').textContent = 'Cannot open - missing scholarship ID';
+        } else {
+            // Try multiple deep link formats to see which works
+            const deepLinkFormats = [
+                // Format 1: Basic path
+                `opportunitydeck://viewDetails?scholarshipRefrence=${scholarshipRefrence}&isMatches=${isMatches}&isApplied=${isApplied}`,
+                
+                // Format 2: With host
+                `opportunitydeck://opportunitydeck.com/viewDetails?scholarshipRefrence=${scholarshipRefrence}&isMatches=${isMatches}&isApplied=${isApplied}`,
+                
+                // Format 3: Direct document path
+                `opportunitydeck://viewDetails?scholarshipRefrence=Scholarships/${scholarshipRefrence}&isMatches=${isMatches}&isApplied=${isApplied}`,
+            ];
+            
+            // Use the second format (what you had originally)
+            deepLink = deepLinkFormats[1];
+            
+            console.log('Generated deep link:', deepLink);
+            debugInfo.innerHTML += `<br><br><strong>Generated Deep Link:</strong><br>${deepLink}`;
+            
+            // Update button
+            const appButton = document.getElementById('appLink');
+            appButton.href = deepLink;
+            
+            // Click handler
+            appButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🚀 Attempting to open app with:', deepLink);
                 window.location.href = deepLink;
                 
-                // Fallback to app store if app doesn't open after 2.5 seconds
                 setTimeout(() => {
                     if (document.hidden === false) {
-                        console.log('App may not be installed');
+                        console.log('⚠️ App may not be installed');
+                        document.getElementById('status').textContent = 'App not detected';
+                        document.getElementById('message').textContent = 'Please install the Opportunity Deck app';
                     }
                 }, 2500);
-            } else {
-                alert('Missing required scholarship parameter.');
-            }
-        });
-        
-        console.log('Generated deep link:', deepLink);
-        
-        // Auto-redirect after 1 second if scholarship reference exists
-        if (scholarshipRefrence) {
+            });
+            
+            // Auto-redirect after 1.5 seconds
             setTimeout(() => {
-                console.log('Auto-redirecting to app...');
+                console.log('🔄 Auto-redirecting to app...');
                 window.location.href = deepLink;
-            }, 1000);
+            }, 1500);
         }
     </script>
 </body>
 </html>
+```
+
+## The real issue
+
+The problem is likely one of these:
+
+1. **Your Flutter app isn't configured to handle the deep link scheme properly**
+2. **The parameters aren't being passed to the widget correctly by your router**
+3. **The DocumentReference is null when the widget builds**
+
+Can you check your **Flutter console/logs** when the red screen appears? It should show the exact line where the null error occurs.
+
+Also, try accessing your app this way to test:
+```
+opportunitydeck://opportunitydeck.com/viewDetails?scholarshipRefrence=TEST_ID&isMatches=false&isApplied=false

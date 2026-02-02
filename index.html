@@ -86,17 +86,22 @@
     </div>
 
     <script>
-        // Read query parameters from URL
         const params = new URLSearchParams(window.location.search);
 
-        // Must match FlutterFlow parameter name exactly
-        const scholarshipId = params.get('scholarshipRefrence');
+        // Accept both scholarshipRef and scholarshipRefrence
+        const scholarshipId = params.get('scholarshipRefrence') || params.get('scholarshipRef');
 
         // Booleans default to false
         const isMatches = params.get('isMatches') === 'true';
         const isApplied = params.get('isApplied') === 'true';
 
-        // Build the deep link
+        console.log({
+            scholarshipId,
+            isMatches,
+            isApplied
+        });
+
+        // Build deep link
         let deepLink = 'opportunitydeck://opportunitydeck.com';
         if (scholarshipId) {
             deepLink =
@@ -105,14 +110,14 @@
                 `&isMatches=${isMatches}` +
                 `&isApplied=${isApplied}`;
         } else {
-            console.error('Missing required parameter: scholarshipRefrence');
+            console.error('Missing required parameter: scholarshipRef or scholarshipRefrence');
         }
 
-        // Update "Open in App" button href
+        // Update "Open in App" button
         const appButton = document.getElementById('appLink');
         appButton.href = deepLink;
 
-        // Optional: click triggers redirect to avoid browser blocking auto redirects
+        // Click triggers deep link
         appButton.addEventListener('click', (e) => {
             e.preventDefault();
             if (scholarshipId) {

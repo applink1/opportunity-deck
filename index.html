@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunity Deck - Opening...</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        .logo {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            font-size: 22px;
+            margin: 20px 0;
+        }
+        p {
+            font-size: 16px;
+            opacity: 0.9;
+            margin: 10px 0;
+        }
+        .links {
+            margin-top: 40px;
+        }
+        .btn {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border: 2px solid white;
+            border-radius: 25px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .btn-primary {
+            background: white;
+            color: #11998e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">Opportunity Deck</div>
+        <div class="spinner"></div>
+        <h2>Opening opportunity...</h2>
+        <p>Redirecting you to the app</p>
+
+        <div class="links">
+            <a href="#" id="appLink" class="btn btn-primary">Open in App</a>
+            <br>
+            <a href="https://apps.apple.com/app/YOUR_APP_ID" class="btn">Download for iOS</a>
+            <a href="https://play.google.com/store/apps/details?id=com.mycompany.opportunitydeck" class="btn">
+                Download for Android
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 1️⃣ Read scholarship reference ID from query params
+        const params = new URLSearchParams(window.location.search);
+        const scholarshipId = params.get('scholarshipRef');
+
+        console.log('Scholarship ID:', scholarshipId);
+
+        // 2️⃣ Build FlutterFlow deep link
+        // DocumentReference MUST be full Firestore path
+        let deepLink = 'opportunitydeck://opportunitydeck.com';
+
+        if (scholarshipId) {
+            deepLink = `opportunitydeck://opportunitydeck.com/viewDetails?scholarsipRefrence=Scholarships/${scholarshipId}`;
+        }
+
+        console.log('Deep Link:', deepLink);
+
+        // 3️⃣ Update button
+        document.getElementById('appLink').href = deepLink;
+
+        // 4️⃣ Auto-open app
+        setTimeout(() => {
+            window.location.href = deepLink;
+        }, 500);
+
+        // 5️⃣ Store fallback detection
+        let appOpened = false;
+        window.addEventListener('blur', () => {
+            appOpened = true;
+        });
+
+        setTimeout(() => {
+            if (!appOpened) {
+                const ua = navigator.userAgent.toLowerCase();
+
+                if (ua.includes('android')) {
+                    // window.location.href = 'https://play.google.com/store/apps/details?id=com.mycompany.opportunitydeck';
+                } else if (ua.includes('iphone') || ua.includes('ipad')) {
+                    // window.location.href = 'https://apps.apple.com/app/YOUR_APP_ID';
+                }
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
